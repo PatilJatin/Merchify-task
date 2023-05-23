@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { fetchQuizQuestions } from "./API";
-// Components
 import QuestionCart from "./components/QuestionCart";
-// types
 import { QuestionsState, Difficulty } from "./API";
+import { Player } from "@lottiefiles/react-lottie-player";
 
 export type AnswerObject = {
   question: string;
@@ -21,22 +20,23 @@ const App: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<AnswerObject[]>([]);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(true);
-  const [timer, setTimer] = useState(20); // Timer set to 60 seconds
+  const [timer, setTimer] = useState(5); // Timer set to 60 seconds
   const [timerRunning, setTimerRunning] = useState(false);
+  const [allQuestionsAnswered, setAllQuestionsAnswered] = useState(false);
 
   const startTrivia = async () => {
     setLoading(true);
     setGameOver(false);
     setTimerRunning(true);
-    setTimer(20);
+    setTimer(15);
+    setScore(0);
+    setUserAnswers([]);
+    setNumber(0);
     const newQuestions = await fetchQuizQuestions(
       TOTAL_QUESTIONS,
       Difficulty.EASY
     );
     setQuestions(newQuestions);
-    setScore(0);
-    setUserAnswers([]);
-    setNumber(0);
     setLoading(false);
   };
 
@@ -57,9 +57,12 @@ const App: React.FC = () => {
 
   const nextQuestion = () => {
     const nextQ = number + 1;
-    if (nextQ === TOTAL_QUESTIONS) {
+    if (nextQ === TOTAL_QUESTIONS || timer === 0) {
       setGameOver(true);
       setTimerRunning(false);
+      if (userAnswers.length === TOTAL_QUESTIONS) {
+        setAllQuestionsAnswered(true);
+      }
     } else {
       setNumber(nextQ);
     }
@@ -73,10 +76,14 @@ const App: React.FC = () => {
         setTimer((prevTimer) => prevTimer - 1);
       }, 1000);
     }
+
     if (timer === 0 || userAnswers.length === TOTAL_QUESTIONS) {
       clearTimeout(countdown);
       setTimerRunning(false);
       setGameOver(true);
+      if (userAnswers.length === TOTAL_QUESTIONS) {
+        setAllQuestionsAnswered(true);
+      }
     }
 
     return () => clearTimeout(countdown);
@@ -86,12 +93,25 @@ const App: React.FC = () => {
     <>
       <h1>QUIZ</h1>
 
-      {(gameOver || userAnswers.length === TOTAL_QUESTIONS) && (
+      {gameOver || userAnswers.length === TOTAL_QUESTIONS ? (
         <button className="start" onClick={startTrivia}>
           Start
         </button>
+      ) : null}
+
+      {((allQuestionsAnswered && !timerRunning) ||
+        (timer === 0 && !gameOver)) && (
+        <>
+          <Player
+            src="https://assets6.lottiefiles.com/packages/lf20_touohxv0.json"
+            className="player"
+            loop
+            autoplay
+            style={{ height: "400px", width: "400px" }}
+          />
+          <p className="score">Final Score: {score}</p>
+        </>
       )}
-      {gameOver && !loading && <p className="score">Final Score: {score}</p>}
 
       {loading && <p>Loading Questions...</p>}
       {!loading && !gameOver && timerRunning ? (
