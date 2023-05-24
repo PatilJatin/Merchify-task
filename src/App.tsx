@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [userAnswers, setUserAnswers] = useState<AnswerObject[]>([]);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(true);
-  const [timer, setTimer] = useState(8); // Timer set to 60 seconds
+  const [timer, setTimer] = useState(60);
   const [timerRunning, setTimerRunning] = useState(false);
   const [allQuestionsAnswered, setAllQuestionsAnswered] = useState(false);
   const [quizOver, setQuizOver] = useState(false);
@@ -28,7 +28,7 @@ const App: React.FC = () => {
     setLoading(true);
     setGameOver(false);
     setTimerRunning(true);
-    setTimer(15);
+    setTimer(60);
     setScore(0);
     setUserAnswers([]);
     setNumber(0);
